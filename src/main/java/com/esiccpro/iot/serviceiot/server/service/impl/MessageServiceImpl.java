@@ -34,11 +34,12 @@ public class MessageServiceImpl implements MessageService {
         messageRequest.setTitle("message title");
         messageRequest.setBody(messageContent);
         messageRequest.setDate(LocalDateTime.now());
+        
         LOGGER.info("Send message from producer: {}", responseContent);
         
         rabbitTemplate.convertAndSend(MessageProducerConfig.EXCHANGE_NAME, MessageProducerConfig.ROUTING_KEY, messageRequest);
         
-        return responseContent.getBytes();
+        return new byte[]{ 01 };
     }
 
 }
