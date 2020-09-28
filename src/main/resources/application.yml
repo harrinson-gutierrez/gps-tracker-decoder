@@ -1,0 +1,10 @@
+server:
+  port: 8090
+
+spring:
+  application:
+    name: netty-server
+
+netty:
+  port: 10001
+  host: 0.0.0.0
