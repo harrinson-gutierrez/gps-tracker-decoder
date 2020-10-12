@@ -2,12 +2,12 @@ package com.esiccpro.iot.serviceiot.server.service;
 
 import java.util.Map;
 
-import com.esiccpro.iot.common.model.Message;
+import com.esiccpro.iot.common.model.VehicleEvent;
 import com.esiccpro.iot.serviceiot.server.convert.IConvertToMessage;
-import com.esiccpro.iot.serviceiot.server.protocol.IBaseProtocol;
+import com.esiccpro.iot.serviceiot.server.protocol.Protocol;
 
 public interface MessageService {
 
-	void processMessage(IBaseProtocol protocol, IConvertToMessage<Map<String, Object>, Message> converter);
+	void processMessage(Protocol protocol, IConvertToMessage<Map<String, Object>, VehicleEvent> converter);
 
 }

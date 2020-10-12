@@ -20,6 +20,16 @@ public class MessageUtil {
 		return new BigInteger(valueString, 2).longValue();
 
 	}
+	
+	public static double getDoubleFromByteArray(byte[] msg) {
+		String valueString = "";
+		for (int i = 0; i < msg.length; i++) {
+			byte b = msg[i];
+			String binaryString = String.format("%8s", Integer.toBinaryString(b & 0xFF)).replace(' ', '0');
+			valueString += binaryString;
+		}
+		return Double.parseDouble(valueString);
+	}
 
 	public static byte[] getByteArrayForBuffer(ByteBuf buffer) {
 		int bufferLength = buffer.readableBytes();

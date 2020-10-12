@@ -7,7 +7,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
-import com.esiccpro.iot.serviceiot.server.protocol.IBaseProtocol;
+import com.esiccpro.iot.serviceiot.server.model.Position;
+import com.esiccpro.iot.serviceiot.server.model.Position.PositionType;
+import com.esiccpro.iot.serviceiot.server.protocol.Protocol;
 import com.esiccpro.iot.serviceiot.server.protocol.converter.TeltonikaSenderConverter;
 import com.esiccpro.iot.serviceiot.server.protocol.impl.TeltonikaProtocol;
 import com.esiccpro.iot.serviceiot.server.protocol.util.MessageUtil;
@@ -15,6 +17,7 @@ import com.esiccpro.iot.serviceiot.server.protocol.util.RegistrationMessageUtil;
 import com.esiccpro.iot.serviceiot.server.service.MessageService;
 
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufUtil;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.ChannelHandler;
@@ -27,7 +30,7 @@ import lombok.extern.slf4j.Slf4j;
 public class NettyServerHandler extends ChannelInboundHandlerAdapter {
 	
 	private Map<ChannelHandlerContext, String> channelToImeiMap = new HashMap<>();
-	
+
 	private MessageService messageService;
 	
 	@Autowired
@@ -51,30 +54,33 @@ public class NettyServerHandler extends ChannelInboundHandlerAdapter {
         log.info("Server receives message: {}", msg);
        
         ByteBuf inBuffer = (ByteBuf) msg;
-              
+        String dumpHex = ByteBufUtil.prettyHexDump(inBuffer);
+        
+        log.info("Dump Hex {}", dumpHex);
+        
         byte[] buf = MessageUtil.getByteArrayForBuffer(inBuffer);
 
         log.info("raw bytes {}", buf);
 
-		IBaseProtocol protocol = null;
+		Protocol protocol = null;
 		
 		if(!this.channelToImeiMap.containsKey(ctx)) {
 			log.info("New device connected");
-			String imei = new String(buf);
-			
-			log.info("Connected with IMEI {}", imei);			
-			this.channelToImeiMap.put(ctx, imei);
 			
 			protocol = new TeltonikaProtocol(new HashMap<>());
+			protocol.set(Position.IMEI, inBuffer, 2, 15, PositionType.STRING);
+			
+			log.info("Connected with IMEI {}", (String)protocol.getPositions().get(Position.IMEI));		
+			
+			this.channelToImeiMap.put(ctx, (String)protocol.getPositions().get(Position.IMEI));
 			
 			log.info("Send Accept {}", protocol.sendAccept());			
-			
+	
 			RegistrationMessageUtil.sendByteArray(ctx, protocol.sendAccept());
 		}else {
 			log.info("Message for IMEI {}", this.channelToImeiMap.get(ctx));
-			
 			protocol = new TeltonikaProtocol(new HashMap<>());
-			
+			protocol.setImei(this.channelToImeiMap.get(ctx));
 			protocol.handle(ctx, inBuffer);
 
 			messageService.processMessage(protocol, new TeltonikaSenderConverter());

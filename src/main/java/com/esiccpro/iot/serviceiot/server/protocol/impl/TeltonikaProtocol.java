@@ -4,13 +4,13 @@ import java.util.Map;
 
 import com.esiccpro.iot.serviceiot.server.model.Position;
 import com.esiccpro.iot.serviceiot.server.model.Position.PositionType;
-import com.esiccpro.iot.serviceiot.server.protocol.IBaseProtocol;
+import com.esiccpro.iot.serviceiot.server.protocol.Protocol;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
 import io.netty.channel.ChannelHandlerContext;
 
-public class TeltonikaProtocol extends Protocol implements IBaseProtocol {
+public class TeltonikaProtocol extends Protocol {
 	
 	public TeltonikaProtocol(Map<String, Object> positions) {
 		super(positions);

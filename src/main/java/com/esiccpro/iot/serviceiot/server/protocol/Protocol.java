@@ -1,4 +1,4 @@
-package com.esiccpro.iot.serviceiot.server.protocol.impl;
+package com.esiccpro.iot.serviceiot.server.protocol;
 
 import java.util.Date;
 import java.util.Map;
@@ -11,6 +11,7 @@ import com.esiccpro.iot.serviceiot.server.protocol.util.MessageUtil;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
+import io.netty.channel.ChannelHandlerContext;
 import lombok.Data;
 
 @Data
@@ -18,13 +19,11 @@ public abstract class Protocol {
 	
 	protected static final Logger LOGGER = LoggerFactory.getLogger(Protocol.class);
 	
-	public final Map<String, Object> positions; 
+	private String imei;
 	
-	private void setPosition(String position, long value) {
-		this.positions.put(position, value);
-	}
+	private final Map<String, Object> positions; 
 	
-	private void setPosition(String position, Date value) {
+	private void setPosition(String position, Object value) {
 		this.positions.put(position, value);
 	}
 	
@@ -41,6 +40,18 @@ public abstract class Protocol {
 				
 				LOGGER.info("Position: {} Value: {} Hex: {}",position, value, copyDump);
 				break;
+			case DOUBLE:
+				double valueD = MessageUtil.getDoubleFromByteArray(byteArray);
+				setPosition(position, valueD);
+				
+				LOGGER.info("Position: {} Value: {} Hex: {}",position, valueD, copyDump);
+				break;
+			case STRING:
+				String text = new String(byteArray);
+				setPosition(position, text);
+				
+				LOGGER.info("Position: {} Value: {} Hex: {}",position, text, copyDump);
+				break;
 			case DATETIME:
 				long dateTime = MessageUtil.getLongFromByteArray(byteArray);
 				Date currentDate = new Date(dateTime);
@@ -52,4 +63,12 @@ public abstract class Protocol {
 				break;
 			}
 	}
+	
+	public abstract byte[] sendAccept();
+	
+	public abstract byte[] sendRejected();
+	
+	public abstract void handle(ChannelHandlerContext ctx, ByteBuf inBuffer);
+	
+	public abstract void sendAck(ChannelHandlerContext ctx, byte[] msg);
 }

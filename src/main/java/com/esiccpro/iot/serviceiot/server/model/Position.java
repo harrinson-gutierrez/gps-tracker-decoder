@@ -2,7 +2,7 @@ package com.esiccpro.iot.serviceiot.server.model;
 
 public final class Position {
 	
-	public enum PositionType {LONG, DATETIME}
+	public enum PositionType {LONG, DOUBLE, DATETIME, STRING}
 	
 	private Position() {}
 	
@@ -15,4 +15,5 @@ public final class Position {
 	public static final String LONGITUD = "Longitud";
 	public static final String LATITUD = "Latitud";
 	public static final String ALTITUDE = "Altitude";
+	public static final String IMEI = "Imei";
 }

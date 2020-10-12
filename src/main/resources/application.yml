@@ -1,10 +1,53 @@
-server:
-  port: 8090
-
 spring:
+  profiles:
+    active: dev
   application:
     name: netty-server
-
+---
+spring:
+  profiles: local
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+    cache:
+      connection:
+        mode: connection
+        size: 20
+    listener:
+      simple:
+       concurrency: 20
+       max-concurrency: 40
+logging:
+  level:
+    org.springframework.data.r2dbc: Debug
+server:
+  port: 6060   
+netty:
+  port: 10001
+  host: 0.0.0.0
+---
+spring:
+  profiles: dev
+  rabbitmq:
+    host: iot-rabbitmq8
+    port: 5672
+    username: guest
+    password: guest
+    cache:
+      connection:
+        mode: connection
+        size: 20
+    listener:
+      simple:
+       concurrency: 20
+       max-concurrency: 40
+logging:
+  level:
+    org.springframework.data.r2dbc: Debug
+server:
+  port: 6060
 netty:
   port: 10001
   host: 0.0.0.0
