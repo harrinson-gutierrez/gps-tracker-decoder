@@ -9,17 +9,17 @@ import io.netty.channel.ChannelInitializer;
 import io.netty.channel.socket.SocketChannel;
 
 @Component
-public class TeltonikaProtocol {
+public class OtherProtocol {
 	
 	@Autowired
-	private TeltonikaProtocolDecoder teltonikaProtocolDecoder;
+	OtherProtocolDecoder otherProtocolDecoder;
 	
-	public TeltonikaProtocol() throws InterruptedException {
-		new NettyServer(10001, new ChannelInitializer<SocketChannel>() {
+	public OtherProtocol() throws InterruptedException {
+		new NettyServer(10002, new ChannelInitializer<SocketChannel>() {
 
 			@Override
 			protected void initChannel(SocketChannel socketChannel) throws Exception {
-				socketChannel.pipeline().addLast(teltonikaProtocolDecoder);
+				socketChannel.pipeline().addLast(otherProtocolDecoder);
 			}
 		});
 	}

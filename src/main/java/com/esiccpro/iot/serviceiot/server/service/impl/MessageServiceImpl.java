@@ -1,7 +1,5 @@
 package com.esiccpro.iot.serviceiot.server.service.impl;
 
-import java.util.Map;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
@@ -10,8 +8,6 @@ import org.springframework.stereotype.Service;
 
 import com.esiccpro.iot.common.model.VehicleEvent;
 import com.esiccpro.iot.serviceiot.ampq.config.MessageProducerConfig;
-import com.esiccpro.iot.serviceiot.server.convert.IConvertToMessage;
-import com.esiccpro.iot.serviceiot.server.protocol.Protocol;
 import com.esiccpro.iot.serviceiot.server.service.MessageService;
 
 @Service
@@ -27,14 +23,11 @@ public class MessageServiceImpl implements MessageService {
     }
     
     @Override
-    public void processMessage(Protocol protocol, IConvertToMessage<Map<String, Object>, VehicleEvent> converter) {
-    	
-    	VehicleEvent message = converter.convert(protocol.getPositions());
-    	message.setImei(protocol.getImei());
-    	
-        LOGGER.info("Receive message from handler protocol: {}", message);
+    public void processMessage(VehicleEvent event) {
 
-        rabbitTemplate.convertAndSend(MessageProducerConfig.EXCHANGE_NAME, MessageProducerConfig.ROUTING_KEY, message);
+        LOGGER.info("Receive message from handler protocol: {}", event);
+
+        rabbitTemplate.convertAndSend(MessageProducerConfig.EXCHANGE_NAME, MessageProducerConfig.ROUTING_KEY, event);
     }
 
 }

@@ -18,15 +18,7 @@ spring:
     listener:
       simple:
        concurrency: 20
-       max-concurrency: 40
-logging:
-  level:
-    org.springframework.data.r2dbc: Debug
-server:
-  port: 6060   
-netty:
-  port: 10001
-  host: 0.0.0.0
+       max-concurrency: 40 
 ---
 spring:
   profiles: dev
@@ -43,11 +35,3 @@ spring:
       simple:
        concurrency: 20
        max-concurrency: 40
-logging:
-  level:
-    org.springframework.data.r2dbc: Debug
-server:
-  port: 6060
-netty:
-  port: 10001
-  host: 0.0.0.0
