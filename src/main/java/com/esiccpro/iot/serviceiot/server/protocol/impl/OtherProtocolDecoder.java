@@ -62,23 +62,24 @@ public class OtherProtocolDecoder extends ChannelInboundHandlerAdapter implement
         String dumpHex = ByteBufUtil.prettyHexDump(inBuffer);
         
         log.info("Dump Hex {}", dumpHex);
+        log.info("Dump Hex {}", ByteBufUtil.hexDump(inBuffer));
         
         byte[] buf = MessageUtil.getByteArrayForBuffer(inBuffer);
 
         log.info("raw bytes {}", buf);
 
-        Map<String, Object> positions = new HashMap<>();
+        Position position = new Position();
 
 		if(!this.channelToImeiMap.containsKey(ctx)) {
 			log.info("New device connected otro protocol");
 			
-			positions.put(Position.IMEI, DecoderUtil.getValuePosition(inBuffer, 4, 15, PositionType.STRING));
+			position.set(Position.IMEI, DecoderUtil.getValuePosition(inBuffer, 4, 15, PositionType.STRING));
 			
 			ByteBuf bufCopyRange = inBuffer.copy(19, 2);
 			log.info("bytes ack {}", ByteBufUtil.prettyHexDump(bufCopyRange));
 			
 			bufCopyRange = Unpooled.copiedBuffer(new byte[] {(byte)0x02}, ByteBufUtil.getBytes(bufCopyRange));
-			this.channelToImeiMap.put(ctx, (String)positions.get(Position.IMEI));
+			this.channelToImeiMap.put(ctx, (String)position.get(Position.IMEI));
 			
 			log.info("Send Accept {}", sendAccept());			
 			byte[] ack = MessageUtil.getByteArrayForBuffer(bufCopyRange);
@@ -90,49 +91,48 @@ public class OtherProtocolDecoder extends ChannelInboundHandlerAdapter implement
 			
 		}else {
 			log.info("Message for IMEI {}", this.channelToImeiMap.get(ctx));
-			positions.put(Position.IMEI,this.channelToImeiMap.get(ctx));
-			positions = handleData(inBuffer, positions);
+			position.set(Position.IMEI,this.channelToImeiMap.get(ctx));
+			position = handleData(inBuffer, position);
 			
-			messageService.processMessage(otherSenderConverter.convert(positions));
+			messageService.processMessage(otherSenderConverter.convert(position.getPositions()));
 
 			sendAck(ctx, buf);
 		}      
     }
     
-    public Map<String, Object> handleData(ByteBuf inBuffer, Map<String, Object> positions) {
-    	positions.put(Position.PREAMBLE, DecoderUtil.getValuePosition(inBuffer, 0, 1, PositionType.LONG));
-    	positions.put(Position.LENGHT_DATA, DecoderUtil.getValuePosition(inBuffer, 1, 2, PositionType.LONG));
-    	positions.put(Position.TAG_4, DecoderUtil.getValuePosition(inBuffer, 3, 1, PositionType.LONG));
-    	positions.put(Position.ID_SECONDARY, DecoderUtil.getValuePosition(inBuffer, 4, 2, PositionType.LONG));
-    	positions.put(Position.TAG_10, DecoderUtil.getValuePosition(inBuffer, 6, 1, PositionType.LONG));
-    	positions.put(Position.NUM_FILE_RECORD, DecoderUtil.getValuePosition(inBuffer, 7, 2, PositionType.LONG));
-    	positions.put(Position.TAG_20, DecoderUtil.getValuePosition(inBuffer, 9, 1, PositionType.LONG));
-    	positions.put(Position.TIME, DecoderUtil.getValuePosition(inBuffer, 10, 4, PositionType.DATETIME));
-    	positions.put(Position.TAG_30, DecoderUtil.getValuePosition(inBuffer, 14, 1, PositionType.LONG));
+    public Position handleData(ByteBuf inBuffer, Position position) {
+    	position.set(Position.PREAMBLE, DecoderUtil.getValuePositionReverse(inBuffer, 0, 1, PositionType.LONG));
+    	position.set(Position.LENGHT_DATA, DecoderUtil.getValuePositionReverse(inBuffer, 1, 2, PositionType.LONG));
+    	position.set(Position.TAG_4, DecoderUtil.getValuePositionReverse(inBuffer, 3, 1, PositionType.LONG));
+    	position.set(Position.ID_SECONDARY, DecoderUtil.getValuePositionReverse(inBuffer, 4, 2, PositionType.LONG));
+    	position.set(Position.TAG_10, DecoderUtil.getValuePositionReverse(inBuffer, 6, 1, PositionType.LONG));
+    	position.set(Position.NUM_FILE_RECORD, DecoderUtil.getValuePositionReverse(inBuffer, 7, 2, PositionType.LONG));
+    	position.set(Position.TAG_20, DecoderUtil.getValuePositionReverse(inBuffer, 9, 1, PositionType.LONG));
+    	position.set(Position.TIME, DecoderUtil.getValuePositionReverse(inBuffer, 10, 4, PositionType.DATETIME));
+    	position.set(Position.TAG_30, DecoderUtil.getValuePositionReverse(inBuffer, 14, 1, PositionType.LONG));
     	
-    	double lat = Double.parseDouble(DecoderUtil.getValuePosition(inBuffer, 15, 4, PositionType.LONG) + "");
+    	double lat = Double.parseDouble(DecoderUtil.getValuePositionReverse(inBuffer, 16, 4, PositionType.LONG) + "");
     	
-    	double latDivided = Double.parseDouble(lat + "") / 10000000;
+    	double latDivided = Double.parseDouble(lat + "") / 1000000;
     	
     	log.info("Lat: {}", latDivided);
     	
-    	positions.put(Position.LATITUD, latDivided);
+    	position.set(Position.LATITUD, latDivided);
     	
-    	long lng = DecoderUtil.hexToLong2(ByteBufUtil.hexDump(inBuffer.copy(19, 4)));
+    	double lng = Double.parseDouble(DecoderUtil.getValuePositionReverse(inBuffer, 20, 4, PositionType.LONG, true) + "");
     	
-    	double lngDivided = Double.parseDouble(lng + "") / 10000000;
+    	double lngDivided = Double.parseDouble(lng + "") / 1000000;
 
     	log.info("Lng: {}", lngDivided);
     
-    	positions.put(Position.LONGITUD, lngDivided);
-    	positions.put(Position.TAG_33, DecoderUtil.getValuePosition(inBuffer, 23, 1, PositionType.LONG));
-    	positions.put(Position.SPEED, DecoderUtil.getValuePosition(inBuffer, 24, 2, PositionType.LONG));
-    	positions.put(Position.DIRECTION, DecoderUtil.getValuePosition(inBuffer, 26, 2, PositionType.LONG));
-    	positions.put(Position.TAG_34, DecoderUtil.getValuePosition(inBuffer, 28, 1, PositionType.LONG));
-    	positions.put(Position.ALTITUDE, DecoderUtil.getValuePosition(inBuffer, 29, 2, PositionType.LONG));
-    	return positions;
+    	position.set(Position.LONGITUD, lngDivided);
+    	position.set(Position.TAG_33, DecoderUtil.getValuePositionReverse(inBuffer, 24, 1, PositionType.LONG));
+    	position.set(Position.SPEED, DecoderUtil.getValuePositionReverse(inBuffer, 25, 2, PositionType.LONG));
+    	position.set(Position.DIRECTION, DecoderUtil.getValuePositionReverse(inBuffer, 27, 2, PositionType.LONG));
+    	position.set(Position.TAG_34, DecoderUtil.getValuePositionReverse(inBuffer, 29, 1, PositionType.LONG));
+    	position.set(Position.ALTITUDE, DecoderUtil.getValuePositionReverse(inBuffer, 30, 2, PositionType.LONG));
+    	return position;
     }
-    
     
 	public byte[] sendAccept() {
 		return new byte[] { 0x01 };

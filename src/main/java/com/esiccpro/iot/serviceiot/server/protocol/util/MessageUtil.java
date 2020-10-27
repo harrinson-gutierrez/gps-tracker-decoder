@@ -21,6 +21,7 @@ public class MessageUtil {
 
 	}
 	
+	
 	public static double getDoubleFromByteArray(byte[] msg) {
 		String valueString = "";
 		for (int i = 0; i < msg.length; i++) {

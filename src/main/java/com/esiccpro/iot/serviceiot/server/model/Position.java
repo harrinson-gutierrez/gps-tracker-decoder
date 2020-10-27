@@ -1,10 +1,31 @@
 package com.esiccpro.iot.serviceiot.server.model;
 
-public final class Position {
+import java.util.HashMap;
+import java.util.Map;
+
+import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
+
+@Data
+@Slf4j
+public class Position {
 	
 	public enum PositionType {LONG, DOUBLE, DATETIME, STRING}
 	
-	private Position() {}
+	private Map<String, Object> positions;
+	
+	public Position() {
+		this.positions = new HashMap<>();
+	}
+	
+	public void set(String position, Object value) {
+		log.info("Position: {} Value: {}", position, value);
+		positions.put(position, value);
+	}
+	
+	public Object get(String position) {
+		return positions.get(position);
+	}
 	
 	public static final String PREAMBLE = "Preambulo";
 	public static final String LENGHT_DATA = "Longitude";

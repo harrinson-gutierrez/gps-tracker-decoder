@@ -17,8 +17,8 @@ public class OtherSenderConverter implements IConvertToMessage<Map<String, Objec
 	public VehicleEvent convert(Map<String, Object> base) {
 		VehicleEvent message = new VehicleEvent();
 		message.setTimeEvent(new Timestamp(new Date().getTime()));
-		message.setLongitud((long)base.get(Position.LONGITUD));
-		message.setLatitud((long)base.get(Position.LATITUD));
+		message.setLongitud((double)base.get(Position.LONGITUD));
+		message.setLatitud((double)base.get(Position.LATITUD));
 		message.setAltitud((long)base.get(Position.ALTITUDE));
 		message.setImei((String)base.get(Position.IMEI));
 		return message;	

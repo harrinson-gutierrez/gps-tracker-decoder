@@ -67,14 +67,14 @@ public class TeltonikaProtocolDecoder extends ChannelInboundHandlerAdapter imple
 
         log.info("raw bytes {}", buf);
 
-        Map<String, Object> positions = new HashMap<>();
+        Position position = new Position();
 
 		if(!this.channelToImeiMap.containsKey(ctx)) {
 			log.info("New device connected");
 			
-			positions.put(Position.IMEI, DecoderUtil.getValuePosition(inBuffer, 2, 15, PositionType.STRING));
+			position.set(Position.IMEI, DecoderUtil.getValuePosition(inBuffer, 2, 15, PositionType.STRING));
 			
-			this.channelToImeiMap.put(ctx, (String)positions.get(Position.IMEI));
+			this.channelToImeiMap.put(ctx, (String)position.get(Position.IMEI));
 			
 			log.info("Send Accept {}", sendAccept());			
 	
@@ -82,39 +82,39 @@ public class TeltonikaProtocolDecoder extends ChannelInboundHandlerAdapter imple
 			
 		}else {
 			log.info("Message for IMEI {}", this.channelToImeiMap.get(ctx));
-			positions.put(Position.IMEI,this.channelToImeiMap.get(ctx));
-			positions = handleData(inBuffer, positions);
+			position.set(Position.IMEI,this.channelToImeiMap.get(ctx));
+			position = handleData(inBuffer, position);
 			
-			messageService.processMessage(teltonikaSenderConverter.convert(positions));
+			messageService.processMessage(teltonikaSenderConverter.convert(position.getPositions()));
 
 			sendAck(ctx, buf);
 		}      
     }
     
-    public Map<String, Object> handleData(ByteBuf inBuffer, Map<String, Object> positions){
-    	positions.put(Position.PREAMBLE, DecoderUtil.getValuePosition(inBuffer, 0, 4, PositionType.LONG));
-    	positions.put(Position.LENGHT_DATA, DecoderUtil.getValuePosition(inBuffer, 4, 4, PositionType.LONG));
-    	positions.put(Position.CODEC, DecoderUtil.getValuePosition(inBuffer, 8, 1, PositionType.LONG));
-    	positions.put(Position.DATA_AVL, DecoderUtil.getValuePosition(inBuffer, 9, 1, PositionType.LONG));
-    	positions.put(Position.TIME, DecoderUtil.getValuePosition(inBuffer, 10, 8, PositionType.DATETIME));
-    	positions.put(Position.PRIORITY, DecoderUtil.getValuePosition(inBuffer, 18, 1, PositionType.LONG));
+    public Position handleData(ByteBuf inBuffer, Position position){
+    	position.set(Position.PREAMBLE, DecoderUtil.getValuePosition(inBuffer, 0, 4, PositionType.LONG));
+    	position.set(Position.LENGHT_DATA, DecoderUtil.getValuePosition(inBuffer, 4, 4, PositionType.LONG));
+    	position.set(Position.CODEC, DecoderUtil.getValuePosition(inBuffer, 8, 1, PositionType.LONG));
+    	position.set(Position.DATA_AVL, DecoderUtil.getValuePosition(inBuffer, 9, 1, PositionType.LONG));
+    	position.set(Position.TIME, DecoderUtil.getValuePosition(inBuffer, 10, 8, PositionType.DATETIME));
+    	position.set(Position.PRIORITY, DecoderUtil.getValuePosition(inBuffer, 18, 1, PositionType.LONG));
     	
-    	long lng = DecoderUtil.hexToLong2(ByteBufUtil.hexDump(inBuffer.copy(19, 4)));
+    	double lng = Double.parseDouble(DecoderUtil.getValuePosition(inBuffer, 19, 4, PositionType.LONG, true) + "");
     	
     	double lngDivided = Double.parseDouble(lng + "") / 10000000;
 
     	log.info("Lng: {}", lngDivided);
     	
-    	positions.put(Position.LONGITUD, lngDivided);
+    	position.set(Position.LONGITUD, lngDivided);
     	
     	double lat = Double.parseDouble(DecoderUtil.getValuePosition(inBuffer, 23, 4, PositionType.LONG) + "");
     	double latDivided = Double.parseDouble(lat + "") / 10000000;
     	
     	log.info("Lat: {}", latDivided);
     	
-    	positions.put(Position.LATITUD, latDivided);
-    	positions.put(Position.ALTITUDE, DecoderUtil.getValuePosition(inBuffer, 27, 2, PositionType.LONG));
-    	return positions;
+    	position.set(Position.LATITUD, latDivided);
+    	position.set(Position.ALTITUDE, DecoderUtil.getValuePosition(inBuffer, 27, 2, PositionType.LONG));
+    	return position;
     }
     
     
