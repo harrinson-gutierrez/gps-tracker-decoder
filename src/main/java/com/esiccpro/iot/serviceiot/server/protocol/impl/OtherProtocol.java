@@ -15,7 +15,7 @@ public class OtherProtocol {
 	OtherProtocolDecoder otherProtocolDecoder;
 	
 	public OtherProtocol() throws InterruptedException {
-		new NettyServer(10002, new ChannelInitializer<SocketChannel>() {
+		new NettyServer(10003, new ChannelInitializer<SocketChannel>() {
 
 			@Override
 			protected void initChannel(SocketChannel socketChannel) throws Exception {

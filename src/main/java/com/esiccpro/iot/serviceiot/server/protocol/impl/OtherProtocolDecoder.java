@@ -16,6 +16,7 @@ import com.esiccpro.iot.serviceiot.server.service.MessageService;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
+import io.netty.buffer.CompositeByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
@@ -48,7 +49,7 @@ public class OtherProtocolDecoder extends ChannelInboundHandlerAdapter implement
      */
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
-        log.info("Channel active teltonika......");
+        log.info("Channel active other protocol......");
     }
 
     /**
@@ -74,20 +75,19 @@ public class OtherProtocolDecoder extends ChannelInboundHandlerAdapter implement
 			log.info("New device connected otro protocol");
 			
 			position.set(Position.IMEI, DecoderUtil.getValuePosition(inBuffer, 4, 15, PositionType.STRING));
+
 			
 			ByteBuf bufCopyRange = inBuffer.copy(19, 2);
-			log.info("bytes ack {}", ByteBufUtil.prettyHexDump(bufCopyRange));
+
+			ByteBuf copy = Unpooled.copiedBuffer(Unpooled.wrappedBuffer(new byte[]{0x02}), bufCopyRange);
 			
-			bufCopyRange = Unpooled.copiedBuffer(new byte[] {(byte)0x02}, ByteBufUtil.getBytes(bufCopyRange));
+			log.info("bytes ack {}", ByteBufUtil.prettyHexDump(copy));
+			
 			this.channelToImeiMap.put(ctx, (String)position.get(Position.IMEI));
-			
-			log.info("Send Accept {}", sendAccept());			
-			byte[] ack = MessageUtil.getByteArrayForBuffer(bufCopyRange);
-			
-			log.info("bytes ack {}", ByteBufUtil.prettyHexDump(bufCopyRange));
-			
-			RegistrationMessageUtil.sendByteArray(ctx, ack);
-			
+
+			ByteBuf encoded = ctx.alloc().buffer(3);
+			encoded.writeBytes(copy);
+			ctx.writeAndFlush(encoded);
 			
 		}else {
 			log.info("Message for IMEI {}", this.channelToImeiMap.get(ctx));
@@ -96,7 +96,15 @@ public class OtherProtocolDecoder extends ChannelInboundHandlerAdapter implement
 			
 			messageService.processMessage(otherSenderConverter.convert(position.getPositions()));
 
-			sendAck(ctx, buf);
+			ByteBuf ack = inBuffer.copy(148, 2);
+			
+			ByteBuf copy = Unpooled.copiedBuffer(Unpooled.wrappedBuffer(new byte[]{0x02}), ack);
+			
+		
+			ByteBuf encoded = ctx.alloc().buffer(3);
+			encoded.writeBytes(copy);
+			log.info("bytes ack {}", ByteBufUtil.prettyHexDump(encoded));
+			ctx.writeAndFlush(encoded);
 		}      
     }
     
@@ -142,13 +150,6 @@ public class OtherProtocolDecoder extends ChannelInboundHandlerAdapter implement
 		return new byte[] { 0x00f };
 	}
 
-	public void sendAck(ChannelHandlerContext ctx, byte[] msg) {
-		int decimal = Integer.parseInt(Integer.toBinaryString(msg[9] & 0xFF).replace(' ', '0'), 2);
-		ByteBuf encoded = ctx.alloc().buffer(4);
-		encoded.writeInt(decimal);
-		ctx.writeAndFlush(encoded);
-	}
-    
 
     @Override
 	public void channelRegistered(ChannelHandlerContext ctx) throws Exception {
