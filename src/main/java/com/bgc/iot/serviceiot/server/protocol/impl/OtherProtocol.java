@@ -1,9 +1,9 @@
-package com.esiccpro.iot.serviceiot.server.protocol.impl;
+package com.bgc.iot.serviceiot.server.protocol.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.esiccpro.iot.serviceiot.server.NettyServer;
+import com.bgc.iot.serviceiot.server.NettyServer;
 
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.socket.SocketChannel;

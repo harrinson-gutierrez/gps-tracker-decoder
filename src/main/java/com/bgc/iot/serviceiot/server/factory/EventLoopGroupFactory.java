@@ -1,4 +1,4 @@
-package com.esiccpro.iot.serviceiot.server.factory;
+package com.bgc.iot.serviceiot.server.factory;
 
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;

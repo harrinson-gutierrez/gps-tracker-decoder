@@ -1,4 +1,4 @@
-package com.esiccpro.iot.serviceiot.server.protocol.util;
+package com.bgc.iot.serviceiot.server.protocol.util;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;

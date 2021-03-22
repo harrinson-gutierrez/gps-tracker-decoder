@@ -1,14 +1,13 @@
-package com.esiccpro.iot.serviceiot.server.protocol.util;
+package com.bgc.iot.serviceiot.server.protocol.util;
 
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
-import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Hex;
 
-import com.esiccpro.iot.serviceiot.server.model.Position.PositionType;
+import com.bgc.iot.serviceiot.server.model.Position.PositionType;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
@@ -56,7 +55,7 @@ public final class DecoderUtil {
 
 		return convertHexToObject(dumpHex, type, false);
 	}
-	
+
 	public static Object getValuePosition(ByteBuf buf, int start, int lenght, PositionType type, boolean com2) {
 		log.info("PositionType: {}", type);
 
@@ -66,30 +65,18 @@ public final class DecoderUtil {
 	}
 
 	public static Object getValuePositionReverse(ByteBuf buf, int start, int lenght, PositionType type) {
-			log.info("PositionType: {}", type);
-
-			String dumpHex = dumpHex(buf, start, lenght);
-			
-			log.info("dumpHex: {}", dumpHex);
-			
-			dumpHex = hexToReverse(dumpHex);
-			
-			log.info("reversed: {}", dumpHex);
-			
-			return convertHexToObject(dumpHex, type, false);
-		}
-	
-	public static Object getValuePositionReverse(ByteBuf buf, int start, int lenght, PositionType type, boolean com2) {
 		log.info("PositionType: {}", type);
 
 		String dumpHex = dumpHex(buf, start, lenght);
-		
-		log.info("dumpHex: {}", dumpHex);
-		
 		dumpHex = hexToReverse(dumpHex);
-		
-		log.info("reversed: {}", dumpHex);
-		
+		return convertHexToObject(dumpHex, type, false);
+	}
+
+	public static Object getValuePositionReverse(ByteBuf buf, int start, int lenght, PositionType type, boolean com2) {
+		log.debug("PositionType: {}", type);
+
+		String dumpHex = dumpHex(buf, start, lenght);
+		dumpHex = hexToReverse(dumpHex);
 		return convertHexToObject(dumpHex, type, com2);
 	}
 
@@ -103,10 +90,25 @@ public final class DecoderUtil {
 
 	public static long hexToLong2(String hex) {
 		String bin = Long.toString(Long.parseLong(hex, 16), 2);
-		
+
 		String binCompl = bin.replace('0', 'X').replace('1', '0').replace('X', '1');
-		
+
 		return (Long.parseLong(binCompl, 2) + 1) * -1;
+	}
+	
+	public static String hexToBinary(String hex) {
+	    int len = hex.length() * 4;
+	    String bin = new BigInteger(hex, 16).toString(2);
+
+	    if(bin.length() < len){
+	        int diff = len - bin.length();
+	        String pad = "";
+	        for(int i = 0; i < diff; ++i){
+	            pad = pad.concat("0");
+	        }
+	        bin = pad.concat(bin);
+	    }
+	    return bin;
 	}
 
 }

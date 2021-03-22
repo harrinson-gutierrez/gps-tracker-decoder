@@ -1,4 +1,4 @@
-package com.esiccpro.iot.serviceiot;
+package com.bgc.iot.serviceiot;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;

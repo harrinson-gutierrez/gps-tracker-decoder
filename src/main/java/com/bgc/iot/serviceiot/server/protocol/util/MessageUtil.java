@@ -1,4 +1,4 @@
-package com.esiccpro.iot.serviceiot.server.protocol.util;
+package com.bgc.iot.serviceiot.server.protocol.util;
 
 import java.math.BigInteger;
 

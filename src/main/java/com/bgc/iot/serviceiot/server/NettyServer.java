@@ -1,15 +1,16 @@
-package com.esiccpro.iot.serviceiot.server;
+package com.bgc.iot.serviceiot.server;
 
 import java.net.InetSocketAddress;
 
 import javax.annotation.PreDestroy;
 
-import com.esiccpro.iot.serviceiot.server.factory.EventLoopGroupFactory;
+import com.bgc.iot.serviceiot.server.factory.EventLoopGroupFactory;
 
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
+import io.netty.channel.FixedRecvByteBufAllocator;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
 import lombok.extern.slf4j.Slf4j;
@@ -24,7 +25,9 @@ public class NettyServer {
 		this.serverBootstrap.group(EventLoopGroupFactory.getBossGroup(), EventLoopGroupFactory.getWorkerGroup())
                 .channel(NioServerSocketChannel.class)
                 .localAddress(new InetSocketAddress(port))
-                .option(ChannelOption.SO_BACKLOG, 1024)
+                .option(ChannelOption.SO_BACKLOG, 2048)
+                .option(ChannelOption.SO_RCVBUF, 2048)
+                .option(ChannelOption.RCVBUF_ALLOCATOR, new FixedRecvByteBufAllocator(2048))
                 .childOption(ChannelOption.SO_KEEPALIVE, true)
                 .childOption(ChannelOption.TCP_NODELAY, true)
                 .childHandler(channelInit);

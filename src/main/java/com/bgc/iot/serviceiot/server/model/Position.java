@@ -1,7 +1,6 @@
-package com.esiccpro.iot.serviceiot.server.model;
+package com.bgc.iot.serviceiot.server.model;
 
 import java.util.HashMap;
-import java.util.Map;
 
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -12,7 +11,7 @@ public class Position {
 	
 	public enum PositionType {LONG, DOUBLE, DATETIME, STRING}
 	
-	private Map<String, Object> positions;
+	private HashMap<String, Object> positions;
 	
 	public Position() {
 		this.positions = new HashMap<>();
@@ -26,19 +25,19 @@ public class Position {
 	public Object get(String position) {
 		return positions.get(position);
 	}
-	
-	public static final String PREAMBLE = "Preambulo";
-	public static final String LENGHT_DATA = "Longitude";
-	public static final String CODEC = "Codec";
-	public static final String DATA_AVL = "Data avl";
-	public static final String TIME = "Time";
-	public static final String PRIORITY = "Prioridad";
-	public static final String LONGITUD = "Longitud";
-	public static final String LATITUD = "Latitud";
-	public static final String ALTITUDE = "Altitude";
-	public static final String IMEI = "Imei";
-	public static final String SPEED = "speed";
-	public static final String DIRECTION = "direction";
+
+	public static final String PREAMBLE = "PREAMBLE";
+	public static final String LENGHT_DATA = "LENGHT_DATA";
+	public static final String CODEC = "CODEC";
+	public static final String DATA_AVL = "DATA_AVL";
+	public static final String TIME = "TIME";
+	public static final String PRIORITY = "PRIORITY";
+	public static final String LONGITUD = "LONGITUD";
+	public static final String LATITUD = "LATITUD";
+	public static final String ALTITUDE = "ALTITUDE";
+	public static final String IMEI = "IMEI";
+	public static final String SPEED = "SPEED";
+	public static final String DIRECTION = "DIRECTION";
 	
 	public static final String ID_SECONDARY = "ID_SECONDARY";
 	public static final String NUM_FILE_RECORD = "NUM_FILE_RECORD";
@@ -49,4 +48,7 @@ public class Position {
 	public static final String TAG_30 = "TAG_30";
 	public static final String TAG_33 = "TAG_33";
 	public static final String TAG_34 = "TAG_34";
+	public static final String TAG_35 = "TAG_35";
+	
+	public static final String SATELITE = "Salite_cordenadas";
 }
